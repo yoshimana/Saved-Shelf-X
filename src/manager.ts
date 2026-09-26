@@ -1,6 +1,6 @@
 import './style.css';
 import type { Collection, Language, Message, Post, SyncResult } from './types';
-import { jsonDataUrl } from './export';
+import { jsonDownloadUrl } from './export';
 import { translate as t } from './i18n';
 
 const expanded = new URLSearchParams(location.search).get('view') === 'tab';
@@ -270,11 +270,13 @@ exportButton.addEventListener('click', () => {
     const exportType = source === 'like' ? 'likes' : 'bookmarks';
     const json = JSON.stringify({ version: 2, type: exportType, exportedAt: new Date().toISOString(), posts: sourcePosts }, null, 2);
     const anchor = document.createElement('a');
-    anchor.href = jsonDataUrl(json);
+    const url = jsonDownloadUrl(json);
+    anchor.href = url;
     anchor.download = `x-${exportType}-${new Date().toISOString().slice(0, 10)}.json`;
     document.body.append(anchor);
     anchor.click();
     anchor.remove();
+    if (url.startsWith('blob:')) setTimeout(() => URL.revokeObjectURL(url), 1000);
     status.textContent = t(language, 'exported', {
       count: sourcePosts.length, collection: t(language, source === 'like' ? 'collectionLike' : 'collectionBookmark')
     });

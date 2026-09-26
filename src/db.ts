@@ -1,28 +1,41 @@
 import type { Collection, Post } from './types';
 
 const DB_NAME = 'x-bookmark-shelf';
-const STORE = 'posts';
-const DB_VERSION = 2;
+const STORE = 'saved-posts-v3';
+const LEGACY_STORE = 'posts';
+const DB_VERSION = 3;
+
+export function migratePostRecord(record: Omit<Post, 'key' | 'source' | 'orderAt'> | Post, oldVersion: number): Post {
+  if (oldVersion >= 2) return record as Post;
+  const savedAt = Date.parse(record.savedAt);
+  return {
+    ...record,
+    key: `bookmark:${record.id}`,
+    source: 'bookmark',
+    orderAt: Number.isFinite(savedAt) ? -savedAt : 0
+  };
+}
 
 function openDb(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
     request.onupgradeneeded = event => {
       const db = request.result;
-      if (event.oldVersion === 0) {
+      const oldVersion = event.oldVersion;
+      if (oldVersion === 0) {
         db.createObjectStore(STORE, { keyPath: 'key' });
         return;
       }
-      if (event.oldVersion < 2) {
-        const oldStore = request.transaction!.objectStore(STORE);
-        const oldRecords = oldStore.getAll();
-        oldRecords.onsuccess = () => {
-          const records = oldRecords.result as Array<Omit<Post, 'key' | 'source' | 'orderAt'>>;
-          db.deleteObjectStore(STORE);
-          const newStore = db.createObjectStore(STORE, { keyPath: 'key' });
-          for (const post of records) newStore.put({ ...post, key: `bookmark:${post.id}`, source: 'bookmark', orderAt: -Date.parse(post.savedAt) });
-        };
-      }
+      const oldStore = request.transaction!.objectStore(LEGACY_STORE);
+      const newStore = db.createObjectStore(STORE, { keyPath: 'key' });
+      const cursorRequest = oldStore.openCursor();
+      cursorRequest.onsuccess = () => {
+        const cursor = cursorRequest.result;
+        if (!cursor) return;
+        newStore.put(migratePostRecord(cursor.value as Post, oldVersion));
+        cursor.delete();
+        cursor.continue();
+      };
     };
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error);

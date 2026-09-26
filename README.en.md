@@ -37,6 +37,7 @@ Choose Japanese, English, or Simplified Chinese from the language menu. The exte
 ## Data and limitations
 
 - Posts are stored in the Safari extension’s IndexedDB and are not sent to an external server. Clearing Safari extension data also deletes saved posts; export JSON for a backup.
+- Safari 18.1 and later use Blob URLs for JSON downloads. Safari 18.0 and earlier fall back to data URLs, so very large exports may still hit browser URL-length limits.
 - The extension reads posts rendered on X’s page. X may change its page structure and break importing. It does not rely on private web APIs.
 - Posts not loaded on the page, deleted posts, quoted-post contents, and media files are not saved. Date range filtering uses the post’s creation date, not the date it was bookmarked or liked.
 - Incremental import assumes X displays the newest items first. If X changes the order, newer posts may be missed.

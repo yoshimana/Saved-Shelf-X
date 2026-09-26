@@ -49,7 +49,7 @@ async function sync(requestedSource: 'bookmark' | 'like', maxCount: number | nul
     // ponytail: 初回走査は最大250画面。より広い収集が必要ならX側のページ境界に合わせて上限を見直す。
     for (let turn = 0; turn < 250; turn++) {
       if (!isBookmarkSurface(location.pathname) && !isLikeSurface(location.pathname)) break;
-      if (provider.expandLongPosts()) await new Promise(resolve => setTimeout(resolve, 150));
+      if (provider.expandLongPosts()) await new Promise(resolve => setTimeout(resolve, 300));
       const fresh = provider.collect(source).filter(post => !seen.has(post.id));
       fresh.forEach(post => seen.add(post.id));
       const ordered = fresh.map(post => ({ ...post, orderAt: startedAt - sequence++ }));

@@ -23,6 +23,7 @@
 		E23E360E30662A9D00ECDC5B /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = E23E360830662A9D00ECDC5B /* manifest.json */; };
 		E23E360F30662A9D00ECDC5B /* content.js in Resources */ = {isa = PBXBuildFile; fileRef = E23E360930662A9D00ECDC5B /* content.js */; };
 		E23E361030662A9D00ECDC5B /* assets in Resources */ = {isa = PBXBuildFile; fileRef = E23E360A30662A9D00ECDC5B /* assets */; };
+		E23E361130662A9D00ECDC5B /* _locales in Resources */ = {isa = PBXBuildFile; fileRef = E23E361230662A9D00ECDC5B /* _locales */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -67,6 +68,7 @@
 		E23E360830662A9D00ECDC5B /* manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = manifest.json; path = Resources/manifest.json; sourceTree = "<group>"; };
 		E23E360930662A9D00ECDC5B /* content.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = content.js; path = Resources/content.js; sourceTree = "<group>"; };
 		E23E360A30662A9D00ECDC5B /* assets */ = {isa = PBXFileReference; lastKnownFileType = folder; name = assets; path = Resources/assets; sourceTree = "<group>"; };
+		E23E361230662A9D00ECDC5B /* _locales */ = {isa = PBXFileReference; lastKnownFileType = folder; name = _locales; path = Resources/_locales; sourceTree = "<group>"; };
 		E2B754663066480600574F3B /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -146,6 +148,7 @@
 				E23E360830662A9D00ECDC5B /* manifest.json */,
 				E23E360930662A9D00ECDC5B /* content.js */,
 				E23E360A30662A9D00ECDC5B /* assets */,
+				E23E361230662A9D00ECDC5B /* _locales */,
 			);
 			name = Resources;
 			path = "X Bookmark Shelf Extension";
@@ -247,6 +250,7 @@
 				E23E361030662A9D00ECDC5B /* assets in Resources */,
 				E23E360B30662A9D00ECDC5B /* manager.html in Resources */,
 				E23E360F30662A9D00ECDC5B /* content.js in Resources */,
+				E23E361130662A9D00ECDC5B /* _locales in Resources */,
 			);
 		};
 /* End PBXResourcesBuildPhase section */
@@ -418,7 +422,7 @@
 			buildSettings = {
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
@@ -432,7 +436,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = 0.1.1;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
@@ -453,7 +457,7 @@
 			buildSettings = {
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
@@ -467,7 +471,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = 0.1.1;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
@@ -491,7 +495,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
@@ -507,7 +511,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = 0.1.1;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
@@ -534,7 +538,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
@@ -550,7 +554,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = 0.1.1;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
