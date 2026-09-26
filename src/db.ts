@@ -50,7 +50,7 @@ export async function insertUntilKnown(posts: Post[], eligibleKeys: Set<string>)
     };
     next();
     transaction.oncomplete = () => { db.close(); resolve({ saved, hitKnown }); };
-    transaction.onabort = () => { db.close(); reject(transaction.error || new Error('保存に失敗しました')); };
+    transaction.onabort = () => { db.close(); reject(transaction.error || new Error('SAVE_FAILED')); };
     transaction.onerror = () => { db.close(); reject(transaction.error); };
   });
 }
@@ -83,7 +83,7 @@ export async function clearCollection(source: Collection): Promise<number> {
       }
     };
     transaction.oncomplete = () => { db.close(); resolve(removed); };
-    transaction.onabort = () => { db.close(); reject(transaction.error || new Error('削除に失敗しました')); };
+    transaction.onabort = () => { db.close(); reject(transaction.error || new Error('DELETE_FAILED')); };
     transaction.onerror = () => { db.close(); reject(transaction.error); };
   });
 }

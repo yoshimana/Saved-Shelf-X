@@ -1,6 +1,7 @@
 import './style.css';
-import type { Collection, Message, Post, SyncResult } from './types';
+import type { Collection, Language, Message, Post, SyncResult } from './types';
 import { jsonDataUrl } from './export';
+import { translate as t } from './i18n';
 
 const expanded = new URLSearchParams(location.search).get('view') === 'tab';
 document.documentElement.classList.toggle('expanded', expanded);
@@ -19,12 +20,18 @@ const bookmarkTab = document.querySelector<HTMLButtonElement>('#bookmark-tab')!;
 const likeTab = document.querySelector<HTMLButtonElement>('#like-tab')!;
 const sortToggle = document.querySelector<HTMLButtonElement>('#sort-toggle')!;
 const openTabButton = document.querySelector<HTMLButtonElement>('#open-tab')!;
+const languageSelect = document.querySelector<HTMLSelectElement>('#language')!;
 const fromDate = document.querySelector<HTMLInputElement>('#from-date')!;
 const toDate = document.querySelector<HTMLInputElement>('#to-date')!;
 const maxItems = document.querySelector<HTMLInputElement>('#max-items')!;
 const monthsInput = document.querySelector<HTMLInputElement>('#months')!;
 maxItems.value = localStorage.getItem('xbs.maxItems') || '';
 monthsInput.value = localStorage.getItem('xbs.months') || '';
+const storedLanguage = localStorage.getItem('xbs.language');
+const preferredLanguage = (navigator.languages?.[0] || navigator.language || 'ja').toLowerCase();
+let language: Language = storedLanguage === 'ja' || storedLanguage === 'en' || storedLanguage === 'zh-CN'
+  ? storedLanguage
+  : preferredLanguage.startsWith('zh') ? 'zh-CN' : preferredLanguage.startsWith('en') ? 'en' : 'ja';
 let source: Collection = 'bookmark';
 let order: 'newest' | 'oldest' = 'newest';
 let sourcePosts: Post[] = [];
@@ -33,9 +40,29 @@ let pendingClear: Collection | null = null;
 exportButton.disabled = true;
 clearButton.disabled = true;
 
+function errorText(error: unknown): string {
+  const detail = error instanceof Error ? error.message : String(error);
+  const errorKeys: Record<string, Parameters<typeof t>[1]> = {
+    SAVE_FAILED: 'saveFailed',
+    DELETE_FAILED: 'deleteFailed',
+    EXTENSION_COMMUNICATION_FAILED: 'communicationError',
+    WAITING_FOR_DATA: 'waitingData',
+    SYNC_ALREADY_RUNNING: 'syncAlreadyRunning',
+    X_HISTORY_REQUIRED: 'historyRequired',
+    X_SOURCE_MISMATCH: 'tabMismatch'
+  };
+  if (errorKeys[detail]) return t(language, errorKeys[detail], { details: '' });
+  return detail;
+}
+
+function showError(error: unknown): void {
+  status.textContent = errorText(error);
+}
+
 function fail(response: unknown): never {
-  if (response && typeof response === 'object' && 'error' in response) throw new Error(String(response.error));
-  throw new Error(chrome.runtime.lastError?.message || '拡張との通信に失敗しました');
+  if (response && typeof response === 'object' && 'error' in response) throw new Error(errorText(response.error));
+  const detail = chrome.runtime.lastError?.message;
+  throw new Error(t(language, 'communicationError', { details: detail ? ` ${detail}` : '' }));
 }
 
 function message<T>(request: Message): Promise<T> {
@@ -65,7 +92,7 @@ function targetTab(collection: Collection): Promise<{ id?: number; url?: string 
 
 function setting(input: HTMLInputElement): number | null {
   if (!input.value) return null;
-  if (!input.validity.valid) throw new Error(`${input.labels?.[0]?.textContent || input.id}は範囲内の数値を入力してください`);
+  if (!input.validity.valid) throw new Error(t(language, 'invalidNumber', { field: t(language, input === maxItems ? 'maxItems' : 'months') }));
   return Number(input.value);
 }
 
@@ -82,10 +109,22 @@ function orderValue(post: Post): number {
 }
 
 function updateActionLabels(): void {
-  const name = source === 'like' ? 'いいね' : 'ブックマーク';
-  syncButton.textContent = `${name}を取り込む`;
-  document.querySelector<HTMLButtonElement>('#export')!.textContent = 'JSONを書き出す';
-  clearButton.textContent = '保存データを削除';
+  syncButton.textContent = t(language, source === 'like' ? 'syncLikes' : 'syncBookmarks');
+}
+
+function updateTranslations(): void {
+  document.documentElement.lang = language;
+  languageSelect.value = language;
+  document.querySelectorAll<HTMLElement>('[data-i18n]').forEach(element => {
+    element.textContent = t(language, element.dataset.i18n as Parameters<typeof t>[1]);
+  });
+  document.querySelectorAll<HTMLInputElement>('[data-i18n-placeholder]').forEach(element => {
+    element.placeholder = t(language, element.dataset.i18nPlaceholder as Parameters<typeof t>[1]);
+  });
+  document.querySelectorAll<HTMLElement>('[data-i18n-aria]').forEach(element => {
+    element.setAttribute('aria-label', t(language, element.dataset.i18nAria as Parameters<typeof t>[1]));
+  });
+  updateActionLabels();
 }
 
 async function refresh(): Promise<Post[]> {
@@ -98,25 +137,25 @@ async function refresh(): Promise<Post[]> {
   loadedSource = source;
   exportButton.disabled = false;
   clearButton.disabled = false;
-  bookmarkTab.textContent = `ブックマーク ${bookmarks.length}`;
-  likeTab.textContent = `いいね ${likes.length}`;
-  const query = search.value.trim().toLocaleLowerCase();
+  bookmarkTab.textContent = t(language, 'bookmarkCount', { count: bookmarks.length });
+  likeTab.textContent = t(language, 'likeCount', { count: likes.length });
+  const query = search.value.trim().toLocaleLowerCase(language);
   const start = fromDate.value ? Date.parse(`${fromDate.value}T00:00:00`) : -Infinity;
   const end = toDate.value ? Date.parse(`${toDate.value}T23:59:59.999`) : Infinity;
   const posts = allPosts.filter(post => {
-    const textMatch = !query || [post.text, post.author, post.handle, post.id].some(value => value.toLocaleLowerCase().includes(query));
+    const textMatch = !query || [post.text, post.author, post.handle, post.id].some(value => value.toLocaleLowerCase(language).includes(query));
     const date = post.createdAt ? Date.parse(post.createdAt) : NaN;
     const dateMatch = start === -Infinity && end === Infinity || Number.isFinite(date) && date >= start && date <= end;
     return textMatch && dateMatch;
   }).sort((a, b) => order === 'newest' ? orderValue(b) - orderValue(a) : orderValue(a) - orderValue(b));
-  countElement.textContent = `${posts.length}件 / ${allPosts.length}件`;
-  sortToggle.textContent = `Xの表示順：${order === 'newest' ? '新しい順' : '古い順'}`;
-  sortToggle.setAttribute('aria-label', `並び順を切り替え。現在は${order === 'newest' ? '新しい順' : '古い順'}`);
+  countElement.textContent = t(language, 'count', { visible: posts.length, total: allPosts.length });
+  sortToggle.textContent = t(language, order === 'newest' ? 'sortNewest' : 'sortOldest');
+  sortToggle.setAttribute('aria-label', t(language, 'sortToggle', { order: t(language, order === 'newest' ? 'sortNewest' : 'sortOldest') }));
   postsElement.replaceChildren();
   if (!posts.length) {
     const empty = document.createElement('p');
     empty.className = 'empty';
-    empty.textContent = allPosts.length ? '条件に一致する投稿はありません' : 'まだ保存した項目はありません';
+    empty.textContent = t(language, allPosts.length ? 'noMatches' : 'emptySaved');
     postsElement.append(empty);
     return posts;
   }
@@ -128,9 +167,9 @@ async function refresh(): Promise<Post[]> {
     link.rel = 'noopener noreferrer';
     link.textContent = `${post.author} · @${post.handle}`;
     const body = document.createElement('p');
-    body.textContent = post.text || '本文なし（画像・動画などの投稿）';
+    body.textContent = post.text || t(language, 'noPostText');
     const date = document.createElement('small');
-    date.textContent = post.createdAt ? new Date(post.createdAt).toLocaleDateString('ja-JP') : '';
+    date.textContent = post.createdAt ? new Date(post.createdAt).toLocaleDateString(language) : '';
     item.append(link, body, date);
     postsElement.append(item);
   }
@@ -145,31 +184,36 @@ syncButton.addEventListener('click', async () => {
     months = setting(monthsInput);
     localStorage.setItem('xbs.maxItems', maxItems.value);
     localStorage.setItem('xbs.months', monthsInput.value);
-  } catch (error) { status.textContent = String(error); return; }
+  } catch (error) { showError(error); return; }
   const tab = await targetTab(source);
   if (!matchingSourceTab(tab, source) || tab.id === undefined) {
     chrome.tabs.create({ url: source === 'like' ? 'https://x.com/i/history/likes' : 'https://x.com/i/history' });
-    status.textContent = `Xの${source === 'like' ? 'いいね' : 'ブックマーク'}画面を開きました。読み込み後、もう一度取り込んでください。`;
+    status.textContent = t(language, 'openX', { collection: t(language, source === 'like' ? 'collectionLike' : 'collectionBookmark') });
     return;
   }
   syncButton.disabled = true;
   clearButton.disabled = true;
-  status.textContent = '条件に合う新しい項目を確認中です。';
+  status.textContent = t(language, 'syncing');
   try {
     const result = await syncTab(tab.id, source, maxCount, months);
-    status.textContent = result.saved
-      ? `${result.saved}件を新しく保存しました。${result.stoppedAtLimit ? '件数上限に達して停止しました。' : result.stoppedAtKnown ? '既存の項目で停止しました。' : ''}${result.skippedOutsideRange ? ` 期間外など${result.skippedOutsideRange}件は保存しませんでした。` : ''}`
-      : `新しい${source === 'like' ? 'いいね' : 'ブックマーク'}はありません。${result.skippedOutsideRange ? ` 期間外など${result.skippedOutsideRange}件は保存しませんでした。` : ''}`;
+    const messages = result.saved ? [t(language, 'syncSaved', { count: result.saved })]
+      : [t(language, 'noNew', { collection: t(language, source === 'like' ? 'collectionLike' : 'collectionBookmark') })];
+    if (result.stoppedAtLimit) messages.push(t(language, 'limitReached'));
+    else if (result.stoppedAtKnown) messages.push(t(language, 'stoppedExisting'));
+    if (result.skippedOutsideRange) messages.push(t(language, 'skippedRange', { count: result.skippedOutsideRange }));
+    status.textContent = messages.join(' ');
     await refresh();
-  } catch (error) { status.textContent = String(error); }
+  } catch (error) { showError(error); }
   finally { syncButton.disabled = false; clearButton.disabled = false; }
 });
 
 clearButton.addEventListener('click', async () => {
   if (loadedSource !== source) return;
-  if (!sourcePosts.length) { status.textContent = '削除する保存データはありません。'; return; }
+  if (!sourcePosts.length) { status.textContent = t(language, 'nothingToDelete'); return; }
   pendingClear = source;
-  clearConfirmText.textContent = `${source === 'like' ? 'いいね' : 'ブックマーク'}の保存データ${sourcePosts.length}件を削除しますか？この操作は取り消せません。`;
+  clearConfirmText.textContent = t(language, 'confirmDelete', {
+    collection: t(language, source === 'like' ? 'collectionLike' : 'collectionBookmark'), count: sourcePosts.length
+  });
   clearDialog.showModal();
 });
 
@@ -183,9 +227,11 @@ confirmClearButton.addEventListener('click', async () => {
   clearButton.disabled = true;
   try {
     const removed = await message<number>({ type: 'CLEAR', source: collection });
-    status.textContent = `${removed}件の${collection === 'like' ? 'いいね' : 'ブックマーク'}を削除しました。`;
+    status.textContent = t(language, 'deleted', {
+      count: removed, collection: t(language, collection === 'like' ? 'collectionLike' : 'collectionBookmark')
+    });
     await refresh();
-  } catch (error) { status.textContent = String(error); }
+  } catch (error) { showError(error); }
   finally { confirmClearButton.disabled = false; clearButton.disabled = false; }
 });
 
@@ -196,25 +242,31 @@ function setSource(next: Collection): void {
   bookmarkTab.setAttribute('aria-selected', String(source === 'bookmark'));
   likeTab.setAttribute('aria-selected', String(source === 'like'));
   status.textContent = '';
-  refresh().catch(error => status.textContent = String(error));
+  refresh().catch(showError);
 }
 
 bookmarkTab.addEventListener('click', () => setSource('bookmark'));
 likeTab.addEventListener('click', () => setSource('like'));
+languageSelect.addEventListener('change', () => {
+  language = languageSelect.value as Language;
+  localStorage.setItem('xbs.language', language);
+  updateTranslations();
+  refresh().catch(showError);
+});
 sortToggle.addEventListener('click', () => {
   order = order === 'newest' ? 'oldest' : 'newest';
-  refresh().catch(error => status.textContent = String(error));
+  refresh().catch(showError);
 });
 openTabButton.addEventListener('click', () => chrome.tabs.create({ url: chrome.runtime.getURL('manager.html?view=tab') }));
 if (expanded) openTabButton.hidden = true;
 for (const control of [search, fromDate, toDate]) {
-  control.addEventListener('input', () => { refresh().catch(error => status.textContent = String(error)); });
-  control.addEventListener('change', () => { refresh().catch(error => status.textContent = String(error)); });
+  control.addEventListener('input', () => { refresh().catch(showError); });
+  control.addEventListener('change', () => { refresh().catch(showError); });
 }
 
 exportButton.addEventListener('click', () => {
   try {
-    if (loadedSource !== source) throw new Error('保存データを読み込み中です。少し待ってから再度お試しください。');
+    if (loadedSource !== source) throw new Error('WAITING_FOR_DATA');
     const exportType = source === 'like' ? 'likes' : 'bookmarks';
     const json = JSON.stringify({ version: 2, type: exportType, exportedAt: new Date().toISOString(), posts: sourcePosts }, null, 2);
     const anchor = document.createElement('a');
@@ -223,8 +275,13 @@ exportButton.addEventListener('click', () => {
     document.body.append(anchor);
     anchor.click();
     anchor.remove();
-    status.textContent = `${sourcePosts.length}件の${source === 'like' ? 'いいね' : 'ブックマーク'}を書き出しました。`;
-  } catch (error) { status.textContent = String(error); }
+    status.textContent = t(language, 'exported', {
+      count: sourcePosts.length, collection: t(language, source === 'like' ? 'collectionLike' : 'collectionBookmark')
+    });
+  } catch (error) {
+    status.textContent = errorText(error);
+  }
 });
 
-refresh().catch(error => status.textContent = String(error));
+updateTranslations();
+refresh().catch(showError);

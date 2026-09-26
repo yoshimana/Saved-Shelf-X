@@ -24,8 +24,8 @@ export function selectHistoryTab(source: Collection): boolean {
     const label = [element.getAttribute('aria-label'), element.getAttribute('title'), element.textContent]
       .filter(Boolean).join(' ').toLocaleLowerCase();
     return source === 'bookmark'
-      ? /bookmarks?|ブックマーク|保存済み/.test(label)
-      : /likes?|いいね/.test(label);
+      ? /bookmarks?|ブックマーク|保存済み|书签|已添加书签/.test(label)
+      : /likes?|いいね|喜欢|赞/.test(label);
   });
   if (!tab) return false;
   if (tab.getAttribute('aria-selected') !== 'true') tab.click();
@@ -58,7 +58,7 @@ export class XDomBookmarkProvider implements BookmarkProvider {
     for (const article of document.querySelectorAll('article[data-testid="tweet"]')) {
       const button = [...article.querySelectorAll<HTMLElement>('[data-testid="tweet-text-show-more-link"], button, [role="button"]')].find(element =>
         element.getAttribute('data-testid') === 'tweet-text-show-more-link' ||
-        /^(show more|もっと見る|続きを読む|さらに表示)$/i.test((element.getAttribute('aria-label') || element.textContent || '').trim())
+        /^(show more|もっと見る|続きを読む|さらに表示|显示更多|展开)$/i.test((element.getAttribute('aria-label') || element.textContent || '').trim())
       );
       if (button) { button.click(); expanded++; }
     }

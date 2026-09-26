@@ -6,7 +6,7 @@ let syncing = false;
 function send(message: Message): Promise<unknown> {
   return new Promise((resolve, reject) => chrome.runtime.sendMessage(message, response => {
     const error = chrome.runtime.lastError;
-    if (error) reject(new Error(error.message));
+    if (error) reject(new Error('EXTENSION_COMMUNICATION_FAILED'));
     else if (response && typeof response === 'object' && 'error' in response) reject(new Error(String(response.error)));
     else resolve(response);
   }));
@@ -22,12 +22,12 @@ function monthsAgo(months: number): number {
 }
 
 async function sync(requestedSource: 'bookmark' | 'like', maxCount: number | null, months: number | null): Promise<SyncResult> {
-  if (syncing) throw new Error('取り込み中です');
+  if (syncing) throw new Error('SYNC_ALREADY_RUNNING');
   const path = location.pathname.replace(/\/+$/, '') || '/';
   const routeSource = isLikeSurface(path) ? 'like' : 'bookmark';
   const source = requestedSource;
-  if (!isBookmarkSurface(path) && !isLikeSurface(path)) throw new Error('Xの履歴画面を開いてから実行してください');
-  if ((routeSource === 'like') !== (source === 'like') && path !== '/i/history') throw new Error('拡張のブックマーク/いいね表示と、Xで開いているタブが一致しません');
+  if (!isBookmarkSurface(path) && !isLikeSurface(path)) throw new Error('X_HISTORY_REQUIRED');
+  if ((routeSource === 'like') !== (source === 'like') && path !== '/i/history') throw new Error('X_SOURCE_MISMATCH');
   if (path === '/i/history' || isLikeSurface(path)) {
     // 履歴のURL自体が分類を示す。対応タブがDOMにあれば念のため選択する。
     selectHistoryTab(source);

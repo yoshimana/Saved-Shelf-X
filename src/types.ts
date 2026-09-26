@@ -1,4 +1,5 @@
 export type Collection = 'bookmark' | 'like';
+export type Language = 'ja' | 'en' | 'zh-CN';
 
 export type Post = {
   key: string;

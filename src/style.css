@@ -7,7 +7,10 @@ main { height: 100%; overflow-y: auto; padding: 20px; }
 header, .count { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 h1 { font-size: 19px; letter-spacing: -.025em; margin: 0; }
 header span, .count, small { color: #687787; font-size: 12px; }
+.header-controls { display: flex; align-items: center; gap: 6px; }
 #open-tab { padding: 5px 8px; font-size: 12px; }
+#language { width: auto; max-width: 112px; padding: 5px 6px; font-size: 12px; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .intro { color: #52616e; margin: 12px 0 18px; }
 .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0 2px; }
 .actions button { min-width: 0; white-space: nowrap; }

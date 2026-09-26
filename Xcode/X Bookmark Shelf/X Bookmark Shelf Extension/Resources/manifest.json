@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
+  "default_locale": "ja",
   "name": "X Bookmark Shelf",
   "version": "0.1.0",
-  "description": "SafariでXのブックマークをローカル保存・検索・JSON出力します。",
+  "description": "__MSG_extensionDescription__",
   "permissions": ["tabs", "unlimitedStorage"],
   "host_permissions": ["https://x.com/*"],
   "background": { "service_worker": "background.js" },

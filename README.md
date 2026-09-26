@@ -1,44 +1,47 @@
 # X Bookmark Shelf
 
-SafariでXのブックマークといいねを読み取り、投稿を別々にローカル保存するmacOS用Web Extensionです。保存済み投稿は一覧・本文/投稿者検索・期間指定・JSON出力ができます。X公式APIやXの非公開Web APIは使いません。
+[English](README.en.md) | [简体中文](README.zh-CN.md)
 
-## 必要なもの
+SafariでXのブックマークと「いいね」を読み取り、Mac内に別々に保存するSafari Web Extensionです。保存した投稿の一覧・検索・期間絞り込み・JSON出力ができます。X公式APIや非公開Web APIは使いません。
 
-- macOSのXcodeとSafari
-- Node.js 22.18以上、npm
-- Xにログイン済みのSafari
+## ダウンロードして使う
 
-## ビルドと有効化
+1. [最新リリースのZIP](https://github.com/yoshimana/Saved-Shelf-X/releases/latest/download/X-Bookmark-Shelf-macos.zip)をダウンロードして解凍し、`X Bookmark Shelf.app` を「アプリケーション」フォルダへ移動します。
+2. アプリを開きます。macOSが開くのを止めた場合は、「システム設定」→「プライバシーとセキュリティ」でこのアプリの **このまま開く** を選び、もう一度開きます。
+3. Safariの「設定」→「開発」で **未署名の機能拡張を許可** をオンにします。「開発」タブがない場合は、「詳細」からWeb開発者向け機能を有効にします。
+4. Safariの「設定」→「機能拡張」で **X Bookmark Shelf** をオンにし、`x.com` へのアクセスを許可します。
 
-1. このフォルダで `npm ci --cache ./work/npm-cache`、`npm run check`、`npm run xcode:sync` を実行します。
-2. `Xcode/X Bookmark Shelf/X Bookmark Shelf.xcodeproj` を開きます。
-3. Xcodeの **Signing & Capabilities** でアプリと拡張の両ターゲットに自分のTeamを設定します。Bundle Identifierの重複エラーが出たら、アプリを固有のIDにし、拡張をそのIDに `.Extension` を付けたものに変更します。
-4. スキーム **X Bookmark Shelf**、実行先 **My Mac** を選び、**Run** します。起動したアプリの案内に従ってSafari設定を開きます。
-5. Safariの **設定 → 機能拡張** で **X Bookmark Shelf** をオンにし、`x.com` へのアクセスを許可します。
+この配布版はDeveloper ID署名・公証をしていません。Safariの **未署名の機能拡張を許可** はSafariを終了するとリセットされるため、Safariを再起動するたびに手順3を行ってください。Xcodeで自分の署名用Teamを設定してビルドすれば、開発署名付きの拡張として使えます。署名設定なしでビルドする場合は、同じSafari設定が必要です。
 
-ソース変更後は `npm run xcode:sync` を実行し、Xcodeで再ビルドします。署名なしのコンパイル確認には次を使えます。
+## ソースからビルド
 
-```sh
-xcodebuild -project 'Xcode/X Bookmark Shelf/X Bookmark Shelf.xcodeproj' -scheme 'X Bookmark Shelf' -configuration Debug -destination 'generic/platform=macOS' CODE_SIGNING_ALLOWED=NO build
-```
+必要なもの: macOS 12以降、Safari 15.4以降、Xcode、Node.js 22.18以降、npm。
+
+1. このリポジトリで `npm ci --cache ./work/npm-cache`、`npm run check`、`npm run xcode:sync` を実行します。
+2. `Xcode/X Bookmark Shelf/X Bookmark Shelf.xcodeproj` をXcodeで開きます。
+3. **Signing & Capabilities** でアプリと拡張の両ターゲットに自分のTeamを選びます。証明書がない場合は両ターゲットの **Signing Certificate** を **Sign to Run Locally** にして、上記のSafari未署名拡張設定を使います。
+4. **X Bookmark Shelf** スキームと **My Mac** を選び、**Run** します。
+
+Bundle Identifierが自分のTeamで使えない場合は、アプリと拡張のIDを変更し、`X Bookmark Shelf/ViewController.swift` の `extensionBundleIdentifier` も拡張のIDに合わせてください。
 
 ## 使い方
 
 1. Safariで `https://x.com/i/history`（ブックマーク）または `https://x.com/i/history/likes`（いいね）を開きます。旧`/i/bookmarks`は履歴画面へ転送されます。
-2. 拡張の **ブックマーク / いいね** タブを選び、必要なら新規取り込み件数の上限と投稿日時の範囲（月数）を指定して、取り込みボタンを押します。空欄は無制限・全期間です。履歴画面内の対応タブを選択してから読み込みます。
-3. 初回は保存済みIDがないため一覧を一度読み込みます。次回から先頭側にある既存IDを見つけた時点で止め、新しく追加された項目だけを保存します。
-4. 画面下の並び順をクリックすると新しい順 / 古い順が切り替わります。取り込み範囲は投稿日時（`createdAt`）で判定し、日時が取得できない投稿は指定期間では保存しません。Xの一覧はブックマーク・いいねをした日時順なので、期間外投稿を飛ばしながら既存IDか件数上限に届くまでスクロールする場合があります。JSON出力は選択中の種類だけを書き出し、ブックマークといいねで別ファイルになります。
-5. 保存データの削除は選択中のブックマークまたはいいねだけを確認後に削除します。削除したデータは復元できません。必要な投稿は先にJSONへ保存してください。
-6. **別タブで一覧** を押すと、Safariの通常タブで保存済み投稿を表示し、検索・期間絞り込みができます。別タブからの取り込みも、同じウインドウに対象のX履歴タブが開いていれば実行できます。
+2. 拡張の「ブックマーク」または「いいね」を選び、必要なら取り込み件数と対象期間（月）を指定して取り込みます。空欄は無制限・全期間です。
+3. 初回は一覧を読み込みます。次回からは既存項目を見つけると止まり、新しい項目を保存します。
+4. 保存した項目は検索、投稿期間の絞り込み、新しい順・古い順の切り替えができます。JSONは選択中の種類だけを出力します。
+5. 「一覧を別タブで開く」から通常のSafariタブで表示できます。削除は選択中の種類だけが対象です。
 
-同じ種類では同じ投稿IDを重複登録せず、既存IDを見つけると読み込みを止めます。ローカル保存先は拡張のIndexedDBです。Safariの拡張データを消去すると保存済み投稿も消えるため、必要に応じてJSONを書き出してください。
+右上の言語メニューで日本語・English・简体中文を選べます。初回はSafariの優先言語を使い、選択は保存されます。
 
-## 制約と依存箇所
+## データと制約
 
-- Xの履歴画面のDOMに依存します。`src/provider.ts` のタブ名、`article[data-testid="tweet"]`、`[data-testid="tweetText"]`、`[data-testid="tweet-text-show-more-link"]`、`[data-testid="User-Name"]`、投稿URL、`time` の読み取り箇所が、Xの画面変更で壊れる可能性があります。取り込み時に表示中の「さらに表示」を展開して全文を取得します。取得処理は `BookmarkProvider` と `XDomBookmarkProvider` に分離しています。
-- 非公開Web APIには依存しません。画面が表示した投稿だけを取得するため、X側で読み込まれない投稿、削除済み投稿、引用元の内容、メディア本体は保存しません。本文がない画像・動画投稿は投稿URLと投稿者を保存します。
-- Xの一覧で新しいものから古いものへ並ぶことを前提に、既存IDを境に増分取得します。Xの表示順が変わると、最初の既存IDより後ろにある新規項目を見落とす可能性があります。初回のみ最大250画面まで自動スクロールして取り込みます。
-- Xの一覧順を保存時刻の代わりに記録します。期間指定は保存日ではなく、投稿日時を使います。
-- Safariの実セッションでの取得動作は環境に依存します。このプロジェクトでは型チェック、取得URLの小テスト、Webビルド、署名なしXcodeビルドまで確認しています。
+- 投稿データはSafari拡張のIndexedDBに保存され、外部サーバーへ送信されません。Safariの拡張データを消去すると保存内容も消えるため、必要に応じてJSONへ書き出してください。
+- Xの画面に表示された投稿を読み取ります。Xの画面構造が変わると取得できなくなる可能性があります。非公開Web APIには依存しません。
+- 画面に読み込まれない投稿、削除済み投稿、引用元の本文、メディア本体は保存しません。期間指定は保存日ではなく投稿日時で判定します。
+- Xの一覧が新しい順に並ぶことを前提に、既存項目を境に増分取得します。Xの並び順が変わると、新しい投稿を見落とす場合があります。
+- X Bookmark ShelfはX Corp.と提携・承認を受けた製品ではありません。
 
-外部サーバーへの送信処理はありません。拡張が要求するサイト権限は `https://x.com/*` だけです。
+## ライセンス
+
+MIT License。詳細は[LICENSE](LICENSE)を参照してください。
