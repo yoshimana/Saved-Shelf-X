@@ -7,11 +7,19 @@ A Safari Web Extension that reads your X bookmarks and likes and stores them sep
 ## Download and install
 
 1. Download and unzip the [latest release](https://github.com/yoshimana/Saved-Shelf-X/releases/latest/download/X-Bookmark-Shelf-macos.zip), then move `X Bookmark Shelf.app` to Applications.
-2. Open the app. If macOS blocks it, go to **System Settings → Privacy & Security**, choose **Open Anyway** for this app, then open it again.
+2. The first time, Control-click the app in Finder and choose **Open**. If macOS still blocks it, go to **System Settings → Privacy & Security**, choose **Open Anyway**, then try again.
 3. In Safari, open **Settings → Developer** and enable **Allow unsigned extensions**. If Developer is missing, enable web developer features in **Settings → Advanced** first.
 4. In **Safari → Settings → Extensions**, enable **X Bookmark Shelf** and allow it to access `x.com`.
 
-This build is not signed with a Developer ID or notarized. Safari resets **Allow unsigned extensions** when Safari quits, so enable it again after each restart. To use a development-signed extension, build from source in Xcode and select your own signing Team for both targets. If you build without a signing identity, the Safari setting is still required.
+This build uses an ad hoc signature to embed App Sandbox entitlements, but it is not signed with a Developer ID or notarized. If Gatekeeper warns you on first launch, allow it using the GUI steps above. Safari resets **Allow unsigned extensions** when Safari quits, so enable it again after each restart. To use a development-signed extension, build from source in Xcode and select your own signing Team for both targets.
+
+## Create a release ZIP
+
+On a Mac with Xcode and Node.js 22.18 or later, run:
+
+`npm run package:release -- ~/Downloads/X-Bookmark-Shelf-macos.zip`
+
+The script runs checks, builds universal binaries, ad hoc signs the app and extension with App Sandbox entitlements, verifies the signatures, and creates the ZIP. It does not use Developer ID signing or notarization. It will not overwrite an existing file at the output path.
 
 ## Build from source
 

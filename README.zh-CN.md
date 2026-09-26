@@ -7,11 +7,19 @@
 ## 下载和安装
 
 1. 下载并解压[最新版本](https://github.com/yoshimana/Saved-Shelf-X/releases/latest/download/X-Bookmark-Shelf-macos.zip)，然后将 `X Bookmark Shelf.app` 移到“应用程序”文件夹。
-2. 打开应用。如果 macOS 阻止运行，请前往“系统设置”→“隐私与安全性”，对该应用点按“仍要打开”，然后再次打开应用。
+2. 首次启动时，在 Finder 中按住 Control 键点按应用并选择“打开”。如果 macOS 仍阻止运行，请前往“系统设置”→“隐私与安全性”，选择“仍要打开”，然后重试。
 3. 在 Safari 中打开“设置”→“开发”，启用“允许未签名的扩展”。如果没有“开发”标签页，请先在“设置”→“高级”中启用 Web 开发者功能。
 4. 在“Safari → 设置 → 扩展”中启用 **X Bookmark Shelf**，并允许其访问 `x.com`。
 
-此版本未经 Developer ID 签名和公证。退出 Safari 后，“允许未签名的扩展”设置会重置，因此每次重新启动 Safari 后都需要再次启用。若希望使用开发签名的扩展，请在 Xcode 中从源码构建，并为应用和扩展目标选择自己的签名 Team。若没有签名身份进行构建，仍需启用 Safari 的未签名扩展设置。
+此版本使用 Ad-hoc 签名将 App Sandbox entitlement 写入应用，但未经 Developer ID 签名和公证。如果首次启动时 Gatekeeper 发出警告，请按上面的图形界面步骤允许打开。退出 Safari 后，“允许未签名的扩展”设置会重置，因此每次重新启动 Safari 后都需要再次启用。若希望使用开发签名的扩展，请在 Xcode 中从源码构建，并为应用和扩展目标选择自己的签名 Team。
+
+## 生成发布 ZIP
+
+在安装了 Xcode 和 Node.js 22.18 或更高版本的 Mac 上运行：
+
+`npm run package:release -- ~/Downloads/X-Bookmark-Shelf-macos.zip`
+
+脚本会运行检查、构建通用架构二进制文件、使用 App Sandbox entitlement 对应用和扩展进行 Ad-hoc 签名、验证签名并生成 ZIP。此流程不使用 Developer ID 签名或公证。如果输出路径已有同名文件，脚本不会覆盖。
 
 ## 从源码构建
 

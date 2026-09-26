@@ -7,11 +7,19 @@ SafariでXのブックマークと「いいね」を読み取り、Mac内に別�
 ## ダウンロードして使う
 
 1. [最新リリースのZIP](https://github.com/yoshimana/Saved-Shelf-X/releases/latest/download/X-Bookmark-Shelf-macos.zip)をダウンロードして解凍し、`X Bookmark Shelf.app` を「アプリケーション」フォルダへ移動します。
-2. アプリを開きます。macOSが開くのを止めた場合は、「システム設定」→「プライバシーとセキュリティ」でこのアプリの **このまま開く** を選び、もう一度開きます。
+2. 初回はFinderでControlキーを押しながらアプリをクリックし、**開く** を選びます。macOSが起動を止めた場合は、「システム設定」→「プライバシーとセキュリティ」で **このまま開く** を選び、再度開きます。
 3. Safariの「設定」→「開発」で **未署名の機能拡張を許可** をオンにします。「開発」タブがない場合は、「詳細」からWeb開発者向け機能を有効にします。
 4. Safariの「設定」→「機能拡張」で **X Bookmark Shelf** をオンにし、`x.com` へのアクセスを許可します。
 
-この配布版はDeveloper ID署名・公証をしていません。Safariの **未署名の機能拡張を許可** はSafariを終了するとリセットされるため、Safariを再起動するたびに手順3を行ってください。Xcodeで自分の署名用Teamを設定してビルドすれば、開発署名付きの拡張として使えます。署名設定なしでビルドする場合は、同じSafari設定が必要です。
+この配布版はSandbox entitlementを埋め込むAd-hoc署名をしていますが、Developer ID署名・公証はしていません。初回起動時にGatekeeperの警告が出た場合は上記のGUI手順で許可してください。Safariの **未署名の機能拡張を許可** はSafariを終了するとリセットされるため、Safariを再起動するたびに手順3を行ってください。Xcodeで自分の署名用Teamを設定してビルドすれば、開発署名付きの拡張として使えます。
+
+## 配布用ZIPを生成
+
+macOS、Xcode、Node.js 22.18以降がある環境で、次を実行します。
+
+`npm run package:release -- ~/Downloads/X-Bookmark-Shelf-macos.zip`
+
+型チェック・テスト、ユニバーサルビルド、アプリと拡張へのAd-hoc署名、Sandbox entitlementの検証、ZIP生成を行います。Developer ID署名・公証は行いません。指定先に同名ファイルがある場合は上書きしません。
 
 ## ソースからビルド
 
