@@ -60,3 +60,25 @@ fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
+
+# Web extension and local tooling
+node_modules/
+dist/
+work/
+build/
+*.log
+.cache/
+.firebase/
+.firebaserc
+.env
+.env.*
+*.pem
+*.key
+service-account.json
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+vendor/
+venv/
+.venv/

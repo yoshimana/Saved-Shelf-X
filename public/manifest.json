@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "X Bookmark Shelf",
+  "version": "0.1.0",
+  "description": "SafariでXのブックマークをローカル保存・検索・JSON出力します。",
+  "permissions": ["tabs", "unlimitedStorage"],
+  "host_permissions": ["https://x.com/*"],
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [{ "matches": ["https://x.com/*"], "js": ["content.js"] }],
+  "action": { "default_title": "X Bookmark Shelf", "default_popup": "manager.html" }
+}

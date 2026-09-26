@@ -1,0 +1,15 @@
+{
+  "name": "x-bookmark-safari",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc --noEmit && vite build",
+    "check": "tsc --noEmit && node tests/dom-provider.test.mjs",
+    "xcode:sync": "npm run build && node scripts/sync-xcode.mjs"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vite": "^7.1.0"
+  }
+}
