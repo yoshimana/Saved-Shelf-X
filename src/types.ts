@@ -10,6 +10,7 @@ export type Post = {
   author: string;
   handle: string;
   text: string;
+  links?: string[];
   createdAt: string | null;
   savedAt: string;
 };

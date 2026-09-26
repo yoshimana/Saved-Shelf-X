@@ -108,6 +108,16 @@ function orderValue(post: Post): number {
   return post.orderAt || -Date.parse(post.savedAt);
 }
 
+function postLinks(post: Post): string[] {
+  const found = post.links?.length ? post.links : post.text.match(/https?:\/\/[^\s<>"']+/g) || [];
+  return [...new Set(found.flatMap(value => {
+    try {
+      const url = new URL(value);
+      return (url.protocol === 'https:' || url.protocol === 'http:') && !url.username && !url.password ? [url.href] : [];
+    } catch { return []; }
+  }))];
+}
+
 function updateActionLabels(): void {
   syncButton.textContent = t(language, source === 'like' ? 'syncLikes' : 'syncBookmarks');
 }
@@ -168,9 +178,26 @@ async function refresh(): Promise<Post[]> {
     link.textContent = `${post.author} · @${post.handle}`;
     const body = document.createElement('p');
     body.textContent = post.text || t(language, 'noPostText');
+    const links = postLinks(post);
+    let linkList: HTMLDivElement | null = null;
+    if (links.length) {
+      linkList = document.createElement('div');
+      linkList.className = 'post-links';
+      for (const url of links) {
+        const postUrl = document.createElement('a');
+        postUrl.className = 'post-url';
+        postUrl.href = url;
+        postUrl.target = '_blank';
+        postUrl.rel = 'noopener noreferrer';
+        postUrl.textContent = url;
+        linkList.append(postUrl);
+      }
+    }
     const date = document.createElement('small');
     date.textContent = post.createdAt ? new Date(post.createdAt).toLocaleDateString(language) : '';
-    item.append(link, body, date);
+    item.append(link, body);
+    if (linkList) item.append(linkList);
+    item.append(date);
     postsElement.append(item);
   }
   return posts;

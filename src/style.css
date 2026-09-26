@@ -28,8 +28,11 @@ label { display: block; font-weight: 600; margin: 18px 0 7px; }
 .sync-limits label { flex: 1; margin: 0; font-size: 12px; }
 .sync-limits input { display: block; margin-top: 4px; padding: 7px 9px; }
 #range-note { display: block; margin-top: 5px; }
+input, select { color: #1d2630; color-scheme: light; }
 input { width: 100%; border: 1px solid #cbd5dc; border-radius: 9px; background: white; padding: 10px; font: inherit; }
+input::placeholder { color: #687787; opacity: 1; }
 select { width: 100%; border: 1px solid #cbd5dc; border-radius: 9px; background: white; padding: 8px; font: inherit; }
+option { color: #1d2630; background: white; }
 .filters > label { margin: 12px 0 5px; }
 .dates { display: flex; align-items: center; gap: 6px; }
 .dates input { min-width: 0; padding: 8px 4px; }
@@ -51,4 +54,6 @@ article { border-top: 1px solid #e0e5e8; padding: 12px 2px; }
 article a { color: #1e5a7e; font-weight: 600; text-decoration: none; }
 article a:hover { text-decoration: underline; }
 article p { white-space: pre-wrap; overflow-wrap: anywhere; margin: 5px 0; }
+.post-links { display: grid; gap: 4px; margin: 6px 0; }
+article a.post-url { color: #1e5a7e; font-weight: 500; text-decoration: underline; overflow-wrap: anywhere; word-break: break-word; }
 .empty { color: #687787; padding: 20px 0; text-align: center; }

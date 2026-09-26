@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "default_locale": "ja",
   "name": "X Bookmark Shelf",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "__MSG_extensionDescription__",
   "permissions": ["tabs", "unlimitedStorage"],
   "host_permissions": ["https://x.com/*"],

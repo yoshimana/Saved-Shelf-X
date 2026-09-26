@@ -46,7 +46,7 @@ try {
     '-quiet', '-project', project, '-scheme', 'X Bookmark Shelf', '-configuration', 'Release',
     '-destination', 'generic/platform=macOS', '-derivedDataPath', work,
     'ARCHS=arm64 x86_64', 'ONLY_ACTIVE_ARCH=NO', 'CODE_SIGNING_ALLOWED=NO',
-    `MARKETING_VERSION=${version}`, 'CURRENT_PROJECT_VERSION=3', 'build'
+    `MARKETING_VERSION=${version}`, 'CURRENT_PROJECT_VERSION=4', 'build'
   ]);
   run('codesign', ['--force', '--sign', '-', '--entitlements', extensionEntitlements, appex]);
   run('codesign', ['--force', '--sign', '-', '--entitlements', appEntitlements, app]);

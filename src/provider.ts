@@ -41,15 +41,41 @@ export function statusFromHref(href: string): { id: string; url: string; handle:
   } catch { return null; }
 }
 
+function safeHttpUrl(value: string | null): string | null {
+  if (!value) return null;
+  try {
+    const url = new URL(value);
+    if ((url.protocol !== 'https:' && url.protocol !== 'http:') || !url.hostname || url.username || url.password) return null;
+    return url.href;
+  } catch { return null; }
+}
+
+export function extractTweetLinks(article: Element): string[] {
+  const urls = new Set<string>();
+  for (const link of article.querySelectorAll<HTMLAnchorElement>('a[href]')) {
+    const href = safeHttpUrl(link.href);
+    if (!href) continue;
+    let host = '';
+    try { host = new URL(href).hostname; } catch { continue; }
+    const expanded = safeHttpUrl(link.getAttribute('data-expanded-url'));
+    if (link.getAttribute('data-testid') !== 'urlLink' && host !== 't.co' && !expanded) continue;
+    const titled = safeHttpUrl(link.title);
+    urls.add(expanded || titled || href);
+  }
+  return [...urls];
+}
+
 function readPost(article: Element, source: Collection): Post | null {
   const timeLink = article.querySelector('time')?.closest('a');
-  const links = timeLink ? [timeLink] : [...article.querySelectorAll('a[href*="/status/"]')];
-  const status = links.map(link => statusFromHref(link.getAttribute('href') || '')).find(Boolean);
+  const statusLinks = timeLink ? [timeLink] : [...article.querySelectorAll('a[href*="/status/"]')];
+  const status = statusLinks.map(link => statusFromHref(link.getAttribute('href') || '')).find(Boolean);
   if (!status) return null;
   const author = article.querySelector('[data-testid="User-Name"] span')?.textContent?.trim() || status.handle;
-  const text = article.querySelector('[data-testid="tweetText"]')?.textContent?.trim() || '';
+  const tweetText = article.querySelector('[data-testid="tweetText"]');
+  const text = tweetText?.textContent?.trim() || '';
+  const links = extractTweetLinks(article);
   const createdAt = article.querySelector('time')?.getAttribute('datetime') || null;
-  return { ...status, key: `${source}:${status.id}`, source, orderAt: 0, author, text, createdAt, savedAt: new Date().toISOString() };
+  return { ...status, key: `${source}:${status.id}`, source, orderAt: 0, author, text, links, createdAt, savedAt: new Date().toISOString() };
 }
 
 export class XDomBookmarkProvider implements BookmarkProvider {

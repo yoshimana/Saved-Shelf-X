@@ -1,7 +1,7 @@
 # Project TODOs
 
 ## Current Goal
-- [x] Sandbox entitlement付きAd-hoc署名でSafari拡張ZIPを作り直し、再リリースする
+- [/] フォーム表示と投稿URLを改善したv0.1.3をリリースする
 
 ## Tasks
 - [x] 取得・保存・一覧・検索・JSON出力
@@ -9,6 +9,8 @@
 - [x] READMEを3言語化し、配布版の手順を記載
 - [x] macOSアプリをビルドし、GitHub Release用ZIPを作成・公開
 - [x] アプリと拡張にSandbox entitlementを埋め込み、再現可能な配布ZIP生成を追加
+- [x] フォーム文字色と投稿リンクの表示を修正し、Safariリソースへ同期
+- [/] v0.1.3署名付きユニバーサルZIPを監査し、GitHub Releaseへ公開
 
 ## Notes / Blockers
 - Safariでのログイン済みXを使う実動作はユーザー環境で確認が必要

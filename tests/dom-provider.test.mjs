@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { statusFromHref } from '../src/provider.ts';
+import { extractTweetLinks, statusFromHref } from '../src/provider.ts';
 import { migratePostRecord } from '../src/db.ts';
 import { jsonDownloadUrl } from '../src/export.ts';
 
@@ -24,6 +24,17 @@ assert.deepEqual(migratePostRecord({ ...migratedPost, key: 'like:123', source: '
 assert.deepEqual(statusFromHref('/someone/status/123?s=20'), { id: '123', url: 'https://x.com/someone/status/123', handle: 'someone' });
 assert.equal(statusFromHref('https://evil.example/someone/status/123'), null);
 assert.equal(statusFromHref('/someone/likes'), null);
+
+const outboundLink = (href, testId = 'urlLink', expanded = null, title = '') => ({
+  href,
+  title,
+  getAttribute: name => name === 'data-testid' ? testId : name === 'data-expanded-url' ? expanded : null
+});
+assert.deepEqual(extractTweetLinks({ querySelectorAll: () => [
+  outboundLink('https://t.co/short', 'urlLink', 'https://example.com/a/long/path?x=1'),
+  outboundLink('https://x.com/someone/status/123', null),
+  outboundLink('https://t.co/legacy')
+] }), ['https://example.com/a/long/path?x=1', 'https://t.co/legacy']);
 
 const clicked = [];
 const button = (testId, label) => ({
